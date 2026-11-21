@@ -1393,12 +1393,12 @@ const PEDIDOS = (() => {
   function cerrar(h){ h.classList.remove("show"); if(!document.querySelector(".hojap.show")) document.body.style.overflow = ""; }
   function abrirPedido(){
     const antes = cfg.cobro === "antes";
-    $("#pSub").textContent = (mesa ? `Mesa ${mesa}` : "Para recoger") + (antes ? " · se paga en caja" : " · pagas al recoger");
+    $("#pSub").textContent = (mesa ? `Mesa ${mesa}` : "Para recoger") + (antes ? " · se paga en la ventanilla" : " · pagas al recoger");
     $("#pDonde").innerHTML = mesa
-      ? `<div class="mesa-n">MESA<b>${mesa}</b></div><span>${antes ? "Al confirmar, acércate a la caja para pagar. Después te lo preparamos." : "Te avisamos aquí cuando esté listo."}</span>`
-      : `${PIN}<span>Para recoger en el food truck${CONFIG.address ? `<br><b>${esc(CONFIG.address)}</b>` : ""}${antes ? "<br>Al confirmar, acércate a la caja para pagar." : ""}</span>`;
-    $("#pTotLbl").textContent = antes ? "TOTAL · SE PAGA EN CAJA" : "TOTAL";
-    $("#pPriv").textContent = (antes ? "Pagas en caja en efectivo o por transferencia. " : "Pagas al recoger. ") + "Tu teléfono solo se usa para avisarte de este pedido.";
+      ? `<div class="mesa-n">MESA<b>${mesa}</b></div><span>${antes ? "Al confirmar, paga en la ventanilla. Después te lo preparamos." : "Te avisamos aquí cuando esté listo."}</span>`
+      : `${PIN}<span>Para recoger en el food truck${CONFIG.address ? `<br><b>${esc(CONFIG.address)}</b>` : ""}${antes ? "<br>Al confirmar, paga en la ventanilla." : ""}</span>`;
+    $("#pTotLbl").textContent = antes ? "TOTAL · SE PAGA EN LA VENTANILLA" : "TOTAL";
+    $("#pPriv").textContent = (antes ? "Pagas en la ventanilla. " : "Pagas al recoger. ") + "Tu teléfono solo se usa para avisarte de este pedido.";
     $("#pErr").classList.remove("show");
     abrir(hojaP);
   }

@@ -195,7 +195,7 @@ function etapa(p){
   return "recibido";
 }
 const MSG = {
-  por_pagar:  ["Acércate a la caja para pagar tu pedido", "Di tu número en la caja. Pagas en efectivo o por transferencia y empezamos a prepararlo."],
+  por_pagar:  ["Paga tu pedido en la ventanilla", "Di tu número en la ventanilla, paga y empezamos a prepararlo."],
   pagado:     ["¡Pago recibido! En un momento empezamos", "Tu pedido ya está en la fila de la cocina."],
   recibido:   ["Recibimos tu pedido", "En un momento empezamos a prepararlo."],
   preparando: ["Estamos preparando tu pedido", "Te avisamos aquí mismo cuando esté listo."],
@@ -208,7 +208,7 @@ function pasos(p){
   if(p.cobro === "antes"){
     const orden = ["por_pagar","pagado","preparando","listo","entregado"], i = orden.indexOf(e);
     return [
-      { t: "Esperando pago en caja", h: hora(p.creado_en), hecho: i > 0, ahora: i === 0 },
+      { t: "Esperando pago en la ventanilla", h: hora(p.creado_en), hecho: i > 0, ahora: i === 0 },
       { t: "Pagado" + met, h: hora(p.pagado_en), hecho: i >= 1, ahora: false },
       { t: "En preparación", hecho: i > 2, ahora: i === 1 || i === 2 },
       { t: "Listo", hecho: i > 3, ahora: i === 3 },
@@ -346,7 +346,7 @@ function pintar(p){
     if(ultimo){ $("#ticket").classList.remove("cambio"); void $("#ticket").offsetWidth; $("#ticket").classList.add("cambio"); }
   }
   $("#cajaBox").innerHTML = e === "por_pagar"
-    ? `<section class="caja entra"><div class="ic">${ICO.caja}</div><div><b>Paga en la caja</b><span>Di: “${n3(p.numero)}”${p.mesa ? " · Mesa " + p.mesa : ""}</span></div><div class="tot"><small>TOTAL</small><strong>${dinero(p.total)}</strong></div></section>` : "";
+    ? `<section class="caja entra"><div class="ic">${ICO.caja}</div><div><b>Paga en la ventanilla</b><span>Di: “${n3(p.numero)}”${p.mesa ? " · Mesa " + p.mesa : ""}</span></div><div class="tot"><small>TOTAL</small><strong>${dinero(p.total)}</strong></div></section>` : "";
   $("#pasos").classList.toggle("listo", ok);
   $("#pasos").innerHTML = e === "cancelado" ? `<div class="paso"><div class="tx" style="color:var(--ink)">Este pedido fue cancelado.</div></div>`
     : pasos(p).map(s => `<div class="paso${s.hecho ? " hecho" : ""}${s.ahora ? " ahora" : ""}"><div class="pt">${ICO.check}</div><div class="tx">${esc(s.t)}</div>${s.hecho && s.h ? `<div class="hr">${s.h}</div>` : ""}</div>`).join("");

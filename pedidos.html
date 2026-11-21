@@ -321,7 +321,7 @@ svg{display:block}
           <button class="tg" id="sw2" type="button" role="switch" aria-label="Recibir pedidos en línea"><i></i></button>
         </div>
         <div class="opt">
-          <div class="txt"><b>Cobrar antes de preparar</b>El cliente pide, paga en la caja (efectivo o transferencia) y después pasa a cocina. Si lo apagas, se prepara primero y se cobra al entregar.</div>
+          <div class="txt"><b>Cobrar antes de preparar</b>El cliente pide, paga en la ventanilla (tarjeta o efectivo) y después pasa a cocina. Si lo apagas, se prepara primero y se cobra al entregar.</div>
           <button class="tg" id="swCobro" type="button" role="switch" aria-label="Cobrar antes de preparar"><i></i></button>
         </div>
       </div>
@@ -369,7 +369,7 @@ const ICO = {
   sonOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>',
   wa:    '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>',
   efe:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>',
-  tra:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h13l-3-3M20 16H7l3 3"/></svg>',
+  tra:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/></svg>',
 };
 const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
 const enPantalla = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
@@ -476,7 +476,7 @@ function pintarSwitch(){
   ["#sw", "#sw2"].forEach(id => { $(id).classList.toggle("on", AJ.pedidos_activos); $(id).setAttribute("aria-checked", AJ.pedidos_activos); });
   $("#swCobro").classList.toggle("on", AJ.cobro === "antes"); $("#swCobro").setAttribute("aria-checked", AJ.cobro === "antes");
   $("#swTit").textContent = AJ.pedidos_activos ? "Recibiendo pedidos en línea" : "Pedidos en línea apagados";
-  $("#swSub").textContent = AJ.pedidos_activos ? (AJ.cobro === "antes" ? "Se cobra en caja antes de preparar." : "Se cobra al entregar.") : "Los clientes solo ven el menú.";
+  $("#swSub").textContent = AJ.pedidos_activos ? (AJ.cobro === "antes" ? "Se cobra en la ventanilla antes de preparar." : "Se cobra al entregar.") : "Los clientes solo ven el menú.";
 }
 async function cambiarActivos(){
   const nuevo = !AJ.pedidos_activos;
@@ -486,7 +486,7 @@ $("#sw").addEventListener("click", cambiarActivos);
 $("#sw2").addEventListener("click", cambiarActivos);
 $("#swCobro").addEventListener("click", async () => {
   const nuevo = AJ.cobro === "antes" ? "al_recoger" : "antes";
-  if(await guardarAjuste({ cobro: nuevo }, nuevo === "antes" ? "Ahora se cobra en caja antes de preparar" : "Ahora se prepara y se cobra al entregar")){ pintarSwitch(); pintarPedidos(); }
+  if(await guardarAjuste({ cobro: nuevo }, nuevo === "antes" ? "Ahora se cobra en la ventanilla antes de preparar" : "Ahora se prepara y se cobra al entregar")){ pintarSwitch(); pintarPedidos(); }
 });
 const mesasBtn = d => async () => {
   const n = Math.max(0, Math.min(99, AJ.mesas + d));
@@ -600,7 +600,7 @@ const waLink = p => `https://wa.me/${p.telefono}?text=` + encodeURIComponent(
 function columnas(){
   const cols = [];
   if(AJ.cobro === "antes" || [...pedidos.values()].some(p => p.cobro === "antes" && p.pago !== "pagado" && p.estado === "recibido"))
-    cols.push({ k: "cobrar", t: "POR COBRAR", c: "var(--amar)", vacio: "Los pedidos nuevos esperan aquí a que el cliente pague en la caja." });
+    cols.push({ k: "cobrar", t: "POR COBRAR", c: "var(--amar)", vacio: "Los pedidos nuevos esperan aquí a que el cliente pague en la ventanilla." });
   cols.push({ k: "nuevos", t: AJ.cobro === "antes" ? "PAGADOS · NUEVOS" : "NUEVOS", c: "var(--nar)", vacio: AJ.cobro === "antes" ? "Los pedidos cobrados esperan aquí para pasar a preparación." : "Sin pedidos nuevos." });
   cols.push({ k: "preparando", t: "EN PREPARACIÓN", c: "var(--azul)", vacio: "Nada en preparación." });
   cols.push({ k: "listos", t: "LISTOS", c: "var(--ok)", vacio: "Nada esperando entrega." });
@@ -622,7 +622,7 @@ function tarjeta(p){
   const k = colDe(p), pag = p.pago === "pagado";
   const cobrar = (entregar) => `<span class="lbl">${entregar ? "COBRAR Y ENTREGAR" : "COBRAR"} · ${dinero(p.total)}</span>
      <button class="btn b-efe" data-a="cobrar" data-m="efectivo" data-e="${entregar ? 1 : 0}" data-id="${p.id}">${ICO.efe}Efectivo</button>
-     <button class="btn b-tra" data-a="cobrar" data-m="transferencia" data-e="${entregar ? 1 : 0}" data-id="${p.id}">${ICO.tra}Transferencia</button>`;
+     <button class="btn b-tra" data-a="cobrar" data-m="tarjeta" data-e="${entregar ? 1 : 0}" data-id="${p.id}">${ICO.tra}Tarjeta</button>`;
   const acc = {
     cobrar: cobrar(false) + `<button class="btn b-can" data-a="cancelar" data-id="${p.id}">Cancelar</button>`,
     nuevos: `<button class="btn b-prep" data-a="preparando" data-id="${p.id}">Empezar a preparar</button>` + (pag ? "" : `<button class="btn b-can" data-a="cancelar" data-id="${p.id}">Cancelar</button>`),
@@ -641,7 +641,7 @@ function tarjeta(p){
     <div class="meta"><b>${esc(p.nombre)}</b> · ${hora(p.creado_en)} · ${hace(p.creado_en)} · <a href="tel:+${p.telefono}">${formatoTel(p.telefono)}</a></div>
     <div class="items">${(p.items || []).map(i => `<div><b>${i.cant}×</b><span>${esc(i.nombre)}</span></div>`).join("")}</div>
     ${p.nota ? `<div class="nota">📝 ${esc(p.nota)}</div>` : ""}
-    <div class="pie"><span class="tot disp">${dinero(p.total)}</span><small>${pag ? "Pagado" + (p.metodo_pago ? " · " + p.metodo_pago : "") : (p.cobro === "antes" ? "Se paga en caja" : "Paga al recoger")}</small></div>
+    <div class="pie"><span class="tot disp">${dinero(p.total)}</span><small>${pag ? "Pagado" + (p.metodo_pago ? " · " + p.metodo_pago : "") : (p.cobro === "antes" ? "Se paga en la ventanilla" : "Paga al recoger")}</small></div>
     <div class="acc">${acc}</div>
   </article>`;
 }
@@ -670,17 +670,17 @@ function pintarHistorial(){
   const reales = lista.filter(p => !p.prueba);
   const pag = reales.filter(p => p.pago === "pagado" && p.estado !== "cancelado");
   const suma = arr => arr.reduce((a, p) => a + Number(p.total), 0);
-  const efe = suma(pag.filter(p => p.metodo_pago === "efectivo")), tra = suma(pag.filter(p => p.metodo_pago === "transferencia"));
+  const efe = suma(pag.filter(p => p.metodo_pago === "efectivo")), tra = suma(pag.filter(p => p.metodo_pago === "tarjeta" || p.metodo_pago === "transferencia"));
   const pend = reales.filter(p => p.pago !== "pagado" && p.estado !== "cancelado");
   $("#resumen").innerHTML = `
     <div class="res main"><small>COBRADO HOY</small><b>${dinero(suma(pag))}</b></div>
     <div class="res"><small>EFECTIVO</small><b>${dinero(efe)}</b></div>
-    <div class="res"><small>TRANSFERENCIA</small><b>${dinero(tra)}</b></div>
+    <div class="res"><small>TARJETA</small><b>${dinero(tra)}</b></div>
     <div class="res"><small>PEDIDOS</small><b>${reales.filter(p => p.estado !== "cancelado").length}</b></div>
     <div class="res"><small>POR COBRAR</small><b>${dinero(suma(pend))}</b></div>
     <div class="res"><small>CANCELADOS</small><b>${reales.filter(p => p.estado === "cancelado").length}</b></div>`;
   const chip = p => p.estado === "cancelado" ? '<span class="hm ca">CANCELADO</span>'
-    : p.pago === "pagado" ? `<span class="hm ${p.metodo_pago === "transferencia" ? "tr" : "ef"}">${(p.metodo_pago || "pagado").toUpperCase()}</span>`
+    : p.pago === "pagado" ? `<span class="hm ${p.metodo_pago === "efectivo" ? "ef" : "tr"}">${(p.metodo_pago || "pagado").toUpperCase()}</span>`
     : '<span class="hm pe">POR COBRAR</span>';
   $("#hist").innerHTML = lista.length ? lista.map(p => `<div class="h">
       <span class="hn">${n3(p.numero)}</span><span class="ht">${hora(p.creado_en)}</span>
