@@ -516,6 +516,19 @@ body.intro-on .hero-logo{opacity:0}
 .campo-p input,.campo-p textarea{width:100%;font:inherit;font-size:16px;padding:13px 14px;border-radius:14px;border:1px solid rgba(20,20,20,.16);background:#fff;color:var(--ink)}
 .campo-p input:focus,.campo-p textarea:focus{outline:2px solid var(--rojo);outline-offset:1px}
 .campo-p textarea{min-height:62px;resize:none}
+/* ---- A domicilio por WhatsApp (temporal: CONFIG.domicilio.activo) ---- */
+.modo-p{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:14px 0 4px;padding:5px;border-radius:16px;background:rgba(20,20,20,.07)}
+.modo-p[hidden]{display:none}
+.modo-p button{font:inherit;font-weight:800;font-size:.86rem;border:0;border-radius:12px;padding:11px 8px;background:transparent;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px}
+.modo-p button svg{width:18px;height:18px;flex:none}
+.modo-p button[aria-pressed="true"]{background:#fff;color:var(--rojo-t, #B0241A);box-shadow:0 2px 8px rgba(20,20,20,.12)}
+.domi-p[hidden]{display:none}
+.ubic-p{margin-top:10px;font:inherit;font-weight:800;font-size:.86rem;display:inline-flex;align-items:center;gap:8px;border:1.5px solid rgba(20,20,20,.18);background:#fff;color:var(--ink);border-radius:999px;padding:10px 16px;min-height:44px;cursor:pointer}
+.ubic-p svg{width:18px;height:18px}
+.ubic-p.si{border-color:#1f8a4c;color:#1f8a4c}
+.okp{display:none;margin-top:12px;padding:12px 14px;border-radius:14px;background:#e7f6ec;color:#17643a;font-weight:700;font-size:.9rem;line-height:1.4}
+.okp.show{display:block}
+.enviar.wa{background:#1f8a4c}
 .recoge{margin-top:14px;display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:rgba(209,47,34,.08);font-size:.86rem;line-height:1.35}
 .recoge svg{width:22px;height:22px;color:var(--rojo);flex:0 0 auto}
 .recoge .mesa-n{flex:0 0 auto;background:var(--negro);color:var(--blanco);border-radius:12px;padding:8px 12px;font-weight:700;font-size:.82rem;text-align:center;line-height:1.1}
@@ -718,6 +731,10 @@ body.intro-on .hero-logo{opacity:0}
     </button>
     <h2 id="hojaPTit">Tu pedido</h2>
     <p class="sub-p" id="pSub"></p>
+    <div class="modo-p" id="pModo" role="group" aria-label="Cómo quieres tu pedido" hidden>
+      <button type="button" data-modo="recoger" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 16V7h11v9"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg>Recoger en el truck</button>
+      <button type="button" data-modo="domi" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>A domicilio</button>
+    </div>
     <div id="lineas"></div>
     <div class="campo-p"><label for="pNota">Nota para la cocina (opcional)</label>
       <textarea id="pNota" maxlength="300" placeholder="Ej: sin cebolla, salsa aparte"></textarea></div>
@@ -725,9 +742,17 @@ body.intro-on .hero-logo{opacity:0}
       <input id="pNombre" maxlength="60" autocomplete="given-name" placeholder="Para llamarte cuando esté listo"></div>
     <div class="campo-p"><label for="pTel">Teléfono</label>
       <input id="pTel" type="tel" inputmode="tel" autocomplete="tel" maxlength="20" placeholder="(407) 555-1234"></div>
+    <div class="domi-p" id="pDomi" hidden>
+      <div class="campo-p"><label for="pDir">Dirección de entrega</label>
+        <input id="pDir" maxlength="160" autocomplete="street-address" placeholder="Calle, número, ciudad y código postal"></div>
+      <div class="campo-p"><label for="pRef">Apto o referencia (opcional)</label>
+        <input id="pRef" maxlength="120" placeholder="Ej: apto 204, casa blanca de rejas negras"></div>
+      <button type="button" class="ubic-p" id="pUbic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><circle cx="12" cy="12" r="8"/></svg><span>Enviar mi ubicación exacta</span></button>
+    </div>
     <div class="recoge" id="pDonde"></div>
     <div class="totalp"><span id="pTotLbl">TOTAL</span><b id="pTotal">$0.00</b></div>
     <div class="errp" id="pErr" role="alert"></div>
+    <div class="okp" id="pOk" role="status"></div>
     <button class="btn btn-fire enviar" id="pEnviar" type="button">Confirmar pedido</button>
     <p class="priv"><span id="pPriv"></span> <a href="privacidad.html" target="_blank" rel="noopener">Privacidad</a></p>
   </div>
@@ -754,6 +779,9 @@ const CONFIG = {
   address: "",       // dónde se para el truck
   mapsUrl: "",       // si se deja vacío, se arma solo con la dirección
   instagram: "",     // sin @
+  /* TEMPORAL: pedidos a domicilio por WhatsApp mientras el papá trabaja desde casa.
+     Para quitarlo, poner activo: false. */
+  domicilio: { activo: true, whatsapp: "14078793441" },
   /* Los favoritos se marcan en el panel (destacado). Esta lista solo se usa
      mientras el menú carga por primera vez. */
   favorites: ["2 Perros Calientes + Bebida", "3 Hamburguesas de Carne + 2 Bebidas", "Tequeños", "Pepito Mixto", "Cachapa con Queso de Mano"],
@@ -1326,7 +1354,7 @@ const PEDIDOS = (() => {
   function menu(m){
     datos = {};
     m.forEach(c => c.items.forEach(it => {
-      if(it.id && it.price != null) datos[it.id] = { id: it.id, name: it.name, price: Number(it.price) };
+      if(it.id && it.price != null) datos[it.id] = { id: it.id, name: it.name, price: Number(it.price), cat: c.name };
     }));
   }
   function ajustes(aj){
@@ -1406,6 +1434,7 @@ const PEDIDOS = (() => {
     $("#pTotal").textContent = dinero(t);
     $("#pEnviar").textContent = n ? `Confirmar pedido · ${dinero(t)}` : "Confirmar pedido";
     $("#pEnviar").disabled = n === 0;
+    if(typeof pintarBoton === "function") pintarBoton();
     if(n === 0 && hojaP.classList.contains("show")) setTimeout(() => cerrar(hojaP), 250);
   }
 
@@ -1421,6 +1450,8 @@ const PEDIDOS = (() => {
     $("#pTotLbl").textContent = antes ? "TOTAL · SE PAGA EN LA VENTANILLA" : "TOTAL";
     $("#pPriv").textContent = (antes ? "Pagas en la ventanilla. " : "Pagas al recoger. ") + "Tu teléfono solo se usa para avisarte de este pedido.";
     $("#pErr").classList.remove("show");
+    $("#pEnviar").classList.remove("wa");
+    modoPintar();
     abrir(hojaP);
   }
 
@@ -1472,6 +1503,95 @@ const PEDIDOS = (() => {
     }
   }
 
+
+  /* ---- A DOMICILIO POR WHATSAPP (temporal: CONFIG.domicilio.activo) ---- */
+  const DOMI = (typeof CONFIG !== "undefined" && CONFIG.domicilio && CONFIG.domicilio.activo) ? CONFIG.domicilio : null;
+  const CASA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>';
+  let modo = "recoger", ubic = null;
+  try{ if(DOMI && sessionStorage.getItem("lf20-modo") === "domi") modo = "domi"; }catch(e){}
+  try{ const d = JSON.parse(localStorage.getItem("lf20-direccion") || "null"); if(d){ $("#pDir").value = d.dir || ""; $("#pRef").value = d.ref || ""; } }catch(e){}
+  function modoPintar(){
+    const puede = !!DOMI && !mesa;
+    if(!puede) modo = "recoger";
+    $("#pModo").hidden = !puede;
+    document.querySelectorAll("#pModo [data-modo]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.modo === modo)));
+    const domi = modo === "domi";
+    $("#pDomi").hidden = !domi;
+    $("#pOk").classList.remove("show");
+    $("#pEnviar").classList.toggle("wa", domi);
+    if(domi){
+      $("#pSub").textContent = "A domicilio · se confirma por WhatsApp";
+      $("#pDonde").innerHTML = `${CASA}<span>Te lo llevamos a tu casa.<br>Al tocar el botón se abre WhatsApp con tu pedido listo: solo dale <b>Enviar</b>. Ahí te confirmamos el envío y el total.</span>`;
+      $("#pTotLbl").textContent = "TOTAL · SIN ENVÍO";
+      $("#pPriv").textContent = "Tu dirección solo se usa para llevarte este pedido.";
+      $("#pNombre").placeholder = "Para saber a quién entregarle";
+    } else {
+      $("#pNombre").placeholder = "Para llamarte cuando esté listo";
+    }
+    pintarBoton();
+  }
+  function pintarBoton(){
+    if(modo !== "domi") return;
+    const { n, t } = totales();
+    $("#pEnviar").textContent = n ? `Enviar pedido por WhatsApp · ${dinero(t)}` : "Enviar pedido por WhatsApp";
+  }
+  function enviarWA(){
+    const nombre = $("#pNombre").value.trim(), tel = $("#pTel").value.trim(), nota = $("#pNota").value.trim();
+    const dir = $("#pDir").value.trim(), ref = $("#pRef").value.trim();
+    const err = m => { const e = $("#pErr"); e.textContent = m; e.classList.add("show"); };
+    $("#pErr").classList.remove("show"); $("#pOk").classList.remove("show");
+    if(!nombre) return err("Escribe tu nombre.");
+    const dig = tel.replace(/\D/g, "");
+    if(dig.length < 10 || dig.length > 15) return err("Revisa tu teléfono: escribe los 10 dígitos.");
+    if(dir.length < 6) return err("Escribe la dirección donde te llevamos el pedido.");
+    const lineas = cesta.filter(l => datos[l.id]);
+    if(!lineas.length) return;
+    const { t } = totales();
+    const mapa = ubic ? `https://maps.google.com/?q=${ubic.lat},${ubic.lng}`
+                      : "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(dir);
+    const txt = [
+      "*Pedido a domicilio · Latin Food 20*",
+      "",
+      ...lineas.map(l => `${l.cant} × ${datos[l.id].name}${datos[l.id].cat && !/^(combos|entradas|bebidas)$/i.test(datos[l.id].cat) ? ` (${datos[l.id].cat})` : ""} — ${dinero(unitario(l) * l.cant)}`),
+      "",
+      `*Total: ${dinero(t)}* (sin el envío)`,
+      "",
+      `*Nombre:* ${nombre}`,
+      `*Teléfono:* ${tel}`,
+      `*Dirección:* ${dir}`,
+      ref ? `*Referencia:* ${ref}` : null,
+      `*Mapa:* ${mapa}`,
+      nota ? `*Nota:* ${nota}` : null,
+    ].filter(x => x !== null).join("\n");
+    try{
+      localStorage.setItem(K_YO, JSON.stringify({ nombre, tel }));
+      localStorage.setItem("lf20-direccion", JSON.stringify({ dir, ref }));
+    }catch(e){}
+    const url = `https://wa.me/${DOMI.whatsapp}?text=${encodeURIComponent(txt)}`;
+    const w = window.open(url, "_blank");
+    if(!w) location.href = url;
+    const ok = $("#pOk");
+    ok.textContent = "Se abrió WhatsApp con tu pedido. Solo toca Enviar y te respondemos por ahí.";
+    ok.classList.add("show");
+  }
+  if(DOMI){
+    $("#pModo").addEventListener("click", e => {
+      const b = e.target.closest("[data-modo]"); if(!b) return;
+      modo = b.dataset.modo;
+      try{ sessionStorage.setItem("lf20-modo", modo); }catch(x){}
+      if(modo === "recoger") abrirPedido(); else modoPintar();
+    });
+    $("#pUbic").addEventListener("click", () => {
+      const b = $("#pUbic"), s = $("span", b);
+      if(!navigator.geolocation){ s.textContent = "Tu teléfono no permite compartir la ubicación"; return; }
+      s.textContent = "Buscando tu ubicación…";
+      navigator.geolocation.getCurrentPosition(p => {
+        ubic = { lat: p.coords.latitude.toFixed(6), lng: p.coords.longitude.toFixed(6) };
+        b.classList.add("si"); s.textContent = "Ubicación agregada";
+      }, () => { s.textContent = "No se pudo. Escribe bien la dirección."; }, { enableHighAccuracy: true, timeout: 12000 });
+    });
+  }
+
   /* pedido reciente: acceso rápido a su estado */
   try{
     const ult = (JSON.parse(localStorage.getItem(K_MIS) || "[]") || [])[0];
@@ -1489,7 +1609,7 @@ const PEDIDOS = (() => {
     const q = e.target.closest("[data-q]");
     if(q){ const l = cesta.filter(x => datos[x.id])[Number(q.dataset.q)]; if(l) sumarLinea(l.id, Number(q.dataset.d)); }
   });
-  $("#pEnviar").addEventListener("click", enviar);
+  $("#pEnviar").addEventListener("click", () => modo === "domi" ? enviarWA() : enviar());
   document.addEventListener("keydown", e => {
     if(e.key !== "Escape") return;
     if(hojaP.classList.contains("show")) cerrar(hojaP);
